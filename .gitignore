@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Éditeurs / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.\#*
+\#*\#
+
+# Claude Code — réglages personnels (les agents dans .claude/agents/ sont versionnés)
+.claude/settings.local.json
+
+# Brouillons et fichiers de travail temporaires
+*.tmp
+*.bak
+~$*
+
+# Médias volumineux hébergés ailleurs (images et audio du blog)
+*.m4a
+*.mp3
+*.mp4
+*.mov
