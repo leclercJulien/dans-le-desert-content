@@ -1,0 +1,546 @@
+<title>Post-mortem de diffusion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --ground:#F1F3EF;
+  --surface:#FBFCFA;
+  --surface-2:#E7EAE3;
+  --ink:#141D19;
+  --ink-2:#3C4741;
+  --muted:#6E7A72;
+  --line:#D5DAD1;
+  --line-soft:#E3E7DF;
+  --accent:#0D6357;
+  --accent-soft:#0D63571A;
+  --neg:#9E4127;
+  --neg-soft:#9E41271A;
+  --shadow:0 1px 2px rgba(20,29,25,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1311;
+    --surface:#151B18;
+    --surface-2:#1E2521;
+    --ink:#E7EBE6;
+    --ink-2:#C0C8C1;
+    --muted:#8A948C;
+    --line:#2A322D;
+    --line-soft:#222925;
+    --accent:#4FC3B0;
+    --accent-soft:#4FC3B01F;
+    --neg:#DC8564;
+    --neg-soft:#DC85641F;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1311;
+  --surface:#151B18;
+  --surface-2:#1E2521;
+  --ink:#E7EBE6;
+  --ink-2:#C0C8C1;
+  --muted:#8A948C;
+  --line:#2A322D;
+  --line-soft:#222925;
+  --accent:#4FC3B0;
+  --accent-soft:#4FC3B01F;
+  --neg:#DC8564;
+  --neg-soft:#DC85641F;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16.5px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1060px;margin:0 auto;padding:0 28px 96px}
+.prose{max-width:70ch}
+
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-variation-settings:"opsz" 96;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.3rem,5.2vw,3.4rem);font-weight:600;line-height:1.06;letter-spacing:-.015em}
+h2{font-size:clamp(1.5rem,2.8vw,2rem);font-weight:600;line-height:1.15;letter-spacing:-.01em}
+h3{font-size:1.13rem;font-weight:600;font-variation-settings:"opsz" 24;line-height:1.3}
+p{margin:0}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--accent)}
+
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.7rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);
+}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+/* ---- header ---- */
+header{padding:72px 0 0}
+.lede{font-size:1.22rem;line-height:1.52;color:var(--ink-2);margin-top:22px;max-width:62ch}
+.meta{
+  display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:30px;
+  font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--muted);
+  border-top:1px solid var(--line);padding-top:16px;
+}
+
+/* ---- sections ---- */
+section{margin-top:76px}
+.sec-head{display:flex;flex-direction:column;gap:12px;margin-bottom:26px}
+.sec-head p{color:var(--ink-2);max-width:66ch}
+
+/* ---- chart ---- */
+.chart{
+  background:var(--surface);border:1px solid var(--line);border-radius:3px;
+  padding:26px 26px 18px;margin:26px 0;overflow-x:auto;
+}
+.chart-title{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:4px}
+.chart-title h3{font-family:"IBM Plex Sans",sans-serif;font-size:.94rem;font-weight:600}
+.chart-note{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--muted)}
+svg{display:block;width:100%;height:auto;min-width:520px}
+
+/* ---- stat row ---- */
+.stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
+  gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;margin:26px 0;
+}
+.stat{background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:5px}
+.stat .n{font-family:"IBM Plex Mono",monospace;font-size:1.62rem;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat .l{font-size:.78rem;color:var(--muted);line-height:1.35}
+
+/* ---- table ---- */
+.tw{overflow-x:auto;margin:24px 0;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.87rem}
+th,td{text-align:left;padding:10px 16px;border-bottom:1px solid var(--line-soft)}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:.68rem;font-weight:500;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--line);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.total td{border-top:1px solid var(--line);font-weight:600;background:var(--surface-2)}
+.dim{color:var(--muted)}
+
+/* ---- findings ---- */
+.findings{display:flex;flex-direction:column;gap:0;margin-top:8px;border-top:1px solid var(--line)}
+.finding{padding:24px 0;border-bottom:1px solid var(--line-soft);display:grid;grid-template-columns:auto 1fr;gap:6px 20px}
+.finding .k{
+  font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--accent);
+  padding-top:5px;letter-spacing:.06em;
+}
+.finding h3{grid-column:2}
+.finding .body{grid-column:2;color:var(--ink-2);margin-top:7px}
+.finding .ev{
+  grid-column:2;margin-top:12px;padding:10px 14px;background:var(--accent-soft);
+  border-left:2px solid var(--accent);font-family:"IBM Plex Mono",monospace;
+  font-size:.78rem;line-height:1.55;color:var(--ink-2);
+}
+
+/* ---- graveyard ---- */
+.grave{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+.gitem{
+  display:grid;grid-template-columns:26px 1fr;gap:4px 16px;
+  padding:15px 0;border-bottom:1px solid var(--line-soft);align-items:start;
+}
+.gitem .x{font-family:"IBM Plex Mono",monospace;font-size:.85rem;color:var(--neg);line-height:1.5}
+.gitem .h{font-weight:600;font-size:.95rem;line-height:1.45}
+.gitem .d{grid-column:2;color:var(--muted);font-size:.87rem;line-height:1.5;margin-top:2px}
+.gitem .d b{color:var(--neg);font-weight:500}
+
+/* ---- callout ---- */
+.callout{
+  border:1px solid var(--line);border-left:3px solid var(--neg);
+  background:var(--surface);padding:22px 26px;border-radius:3px;margin:28px 0;
+  display:flex;flex-direction:column;gap:10px;
+}
+.callout .eyebrow{color:var(--neg)}
+.callout p{color:var(--ink-2)}
+.callout.pos{border-left-color:var(--accent)}
+.callout.pos .eyebrow{color:var(--accent)}
+
+/* ---- actions ---- */
+.acts{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;margin-top:24px}
+.act{background:var(--surface);padding:20px 24px;display:grid;grid-template-columns:auto 1fr;gap:4px 18px}
+.act .p{
+  font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 8px;border-radius:2px;height:fit-content;margin-top:3px;white-space:nowrap;
+}
+.act .p.now{background:var(--accent);color:var(--surface)}
+.act .p.now::before{content:""}
+.act .p.next{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.act h3{grid-column:2}
+.act p{grid-column:2;color:var(--ink-2);font-size:.93rem;margin-top:5px}
+
+ul.plain{margin:14px 0 0;padding-left:19px;color:var(--ink-2);display:flex;flex-direction:column;gap:7px}
+ul.plain li::marker{color:var(--muted)}
+
+footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:.83rem;max-width:70ch}
+
+@media (max-width:620px){
+  .wrap{padding:0 20px 72px}
+  .finding{grid-template-columns:1fr}
+  .finding .k,.finding h3,.finding .body,.finding .ev{grid-column:1}
+  .act{grid-template-columns:1fr}
+  .act h3,.act p{grid-column:1}
+  .act .p{justify-self:start}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">dans-le-desert.fr · archive réseaux sociaux</p>
+  <h1>Post-mortem de diffusion</h1>
+  <p class="lede">Six mois, cinq plateformes, 62 publications autour du Marathon des Sables Namibie 2026. Voici ce qu'elles ont réellement produit — les neuf explications qu'il a fallu abandonner en route, et le chiffre que les plateformes ne disaient pas.</p>
+  <div class="meta">
+    <span>Période <span class="mono">11 mars → 15 juin 2026</span></span>
+    <span>Relevé <span class="mono">10 septembre 2026</span></span>
+    <span>Source <span class="mono">posts-reseaux-sociaux/</span> + analytics blog</span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Le fait central</p>
+    <h2>Un même texte vaut zéro ou 725</h2>
+    <p>Le récit « De 105 kg à 107 km » a été publié sur seize surfaces en deux jours. Voici où chaque version a atterri, sur une échelle unique. Le second récit, « 5 erreurs pour vivre l'enfer », est tracé sur la même échelle.</p>
+  </div>
+
+  <div class="chart">
+    <div class="chart-title">
+      <h3>Réactions obtenues par surface, à contenu identique</h3>
+      <span class="chart-note">échelle commune · 0 → 725 réactions</span>
+    </div>
+    <svg viewBox="0 0 1000 232" role="img" aria-label="Distribution des réactions : le récit 105 kg va de 0 à 725 sur seize surfaces, le récit 5 erreurs de 0 à 81 sur treize surfaces.">
+      <!-- grid -->
+      <g stroke="var(--line-soft)" stroke-width="1">
+        <line x1="150" y1="24" x2="150" y2="176"/>
+        <line x1="266" y1="24" x2="266" y2="176"/>
+        <line x1="382" y1="24" x2="382" y2="176"/>
+        <line x1="498" y1="24" x2="498" y2="176"/>
+        <line x1="614" y1="24" x2="614" y2="176"/>
+        <line x1="730" y1="24" x2="730" y2="176"/>
+        <line x1="846" y1="24" x2="846" y2="176"/>
+      </g>
+      <line x1="150" y1="176" x2="962" y2="176" stroke="var(--line)" stroke-width="1"/>
+
+      <!-- row 1 : 105 kg -->
+      <text x="0" y="62" fill="var(--ink)" font-family="IBM Plex Sans" font-size="14" font-weight="600">105 kg</text>
+      <text x="0" y="80" fill="var(--muted)" font-family="IBM Plex Mono" font-size="11">16 surfaces</text>
+      <g fill="var(--accent)" opacity="0.8">
+        <circle cx="150" cy="64" r="7"/><circle cx="150" cy="64" r="7"/>
+        <circle cx="153" cy="64" r="7"/><circle cx="156" cy="64" r="7"/>
+        <circle cx="161" cy="64" r="7"/><circle cx="161" cy="64" r="7"/>
+        <circle cx="161" cy="64" r="7"/><circle cx="165" cy="64" r="7"/>
+        <circle cx="166" cy="64" r="7"/><circle cx="172" cy="64" r="7"/>
+        <circle cx="180" cy="64" r="7"/><circle cx="183" cy="64" r="7"/>
+        <circle cx="224" cy="64" r="7"/><circle cx="273" cy="64" r="7"/>
+        <circle cx="310" cy="64" r="7"/>
+      </g>
+      <circle cx="962" cy="64" r="9.5" fill="var(--accent)"/>
+      <text x="946" y="68" fill="var(--accent)" font-family="IBM Plex Mono" font-size="12.5" font-weight="600" text-anchor="end">725 — groupe Running</text>
+      <text x="326" y="68" fill="var(--muted)" font-family="IBM Plex Mono" font-size="11">143 · 110 · 66</text>
+
+      <!-- row 2 : 5 erreurs -->
+      <text x="0" y="128" fill="var(--ink)" font-family="IBM Plex Sans" font-size="14" font-weight="600">5 erreurs</text>
+      <text x="0" y="146" fill="var(--muted)" font-family="IBM Plex Mono" font-size="11">13 surfaces</text>
+      <g fill="var(--ink-2)" opacity="0.7">
+        <circle cx="150" cy="130" r="7"/><circle cx="150" cy="130" r="7"/>
+        <circle cx="153" cy="130" r="7"/><circle cx="153" cy="130" r="7"/>
+        <circle cx="155" cy="130" r="7"/><circle cx="156" cy="130" r="7"/>
+        <circle cx="157" cy="130" r="7"/><circle cx="161" cy="130" r="7"/>
+        <circle cx="178" cy="130" r="7"/><circle cx="178" cy="130" r="7"/>
+        <circle cx="231" cy="130" r="7"/><circle cx="241" cy="130" r="7"/>
+        <circle cx="150" cy="130" r="7"/>
+      </g>
+      <text x="256" y="134" fill="var(--muted)" font-family="IBM Plex Mono" font-size="11">81 · 72 — les deux seuls groupes qui ont porté ce texte</text>
+
+      <!-- axis -->
+      <g fill="var(--muted)" font-family="IBM Plex Mono" font-size="11" text-anchor="middle">
+        <text x="150" y="196">0</text>
+        <text x="266" y="196">100</text>
+        <text x="382" y="196">200</text>
+        <text x="498" y="196">300</text>
+        <text x="614" y="196">400</text>
+        <text x="730" y="196">500</text>
+        <text x="846" y="196">600</text>
+        <text x="962" y="196">700</text>
+      </g>
+      <text x="150" y="220" fill="var(--muted)" font-family="IBM Plex Sans" font-size="11.5">Vingt et une publications sur 62 font 5 réactions ou moins. Six en font zéro.</text>
+    </svg>
+  </div>
+
+  <div class="prose">
+    <p>Ni la taille du groupe, ni son débit de publication, ni son thème affiché n'expliquent cet écart. Deux exemples suffisent à le montrer : le <strong>même texte publié le même jour</strong> obtient 81 réactions dans un groupe de 28 500 membres et 3 dans un groupe de 97 900. Et le post « J-19 » du 6 avril fait <strong>27 réactions dans un groupe de 12 100 membres, 1 dans un groupe de 12 600</strong>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Le corpus</p>
+    <h2>Ce qui a été publié</h2>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="n">62</span><span class="l">publications consignées</span></div>
+    <div class="stat"><span class="n">1 849</span><span class="l">réactions cumulées</span></div>
+    <div class="stat"><span class="n">243</span><span class="l">commentaires</span></div>
+    <div class="stat"><span class="n">13</span><span class="l">partages</span></div>
+    <div class="stat"><span class="n" style="color:var(--accent)">1 145</span><span class="l">visiteurs amenés sur le blog</span></div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>Plateforme</th><th>Surface</th><th class="num">Posts</th><th class="num">Réactions</th><th class="num">Moy.</th><th class="num">Comm.</th><th>Portée</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Facebook</td><td>16 groupes</td><td class="num">38</td><td class="num">1 487</td><td class="num">39,1</td><td class="num">218</td><td class="dim">non exposée</td></tr>
+        <tr><td>Facebook</td><td>profil</td><td class="num">7</td><td class="num">69</td><td class="num">9,9</td><td class="num">10</td><td class="dim">non exposée</td></tr>
+        <tr><td>Instagram</td><td>profil <span class="dim mono">76 ab.</span></td><td class="num">10</td><td class="num">95</td><td class="num">9,5</td><td class="num">6</td><td class="mono">1 303 vues</td></tr>
+        <tr><td>LinkedIn</td><td>profil</td><td class="num">4</td><td class="num">44</td><td class="num">11,0</td><td class="num">6</td><td class="mono">3 575 impr.</td></tr>
+        <tr><td>Strava</td><td>club MDS</td><td class="num">3</td><td class="num">154</td><td class="num">51,3</td><td class="num">3</td><td class="dim">non exposée</td></tr>
+        <tr><td>WhatsApp</td><td class="dim">canal — 7 contacts</td><td class="num dim">—</td><td class="num dim">—</td><td class="num dim">—</td><td class="num dim">—</td><td class="dim">non consigné</td></tr>
+        <tr class="total"><td colspan="2">Total</td><td class="num">62</td><td class="num">1 849</td><td class="num">29,8</td><td class="num">243</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p class="eyebrow">Concentration extrême</p>
+    <p><strong>Trois publications concentrent 53 % de toutes les réactions de l'archive</strong> — 978 sur 1 849. Ce sont les trois versions du récit « 105 kg » publiées dans les groupes <em>Running</em> (725), <em>Courir après 50 ans</em> (143) et <em>Marathon / semi / 10 km</em> (110), toutes le 27 mars 2026. Les cinquante-neuf autres publications se partagent le reste.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Ce qui est établi</p>
+    <h2>Sept constats qui tiennent</h2>
+    <p>Chacun repose sur des comparaisons à contenu identique, et aucun n'a été démenti par une donnée ultérieure.</p>
+  </div>
+
+  <div class="findings">
+
+    <div class="finding">
+      <span class="k">01</span>
+      <h3>L'audience propre ne pèse rien ; les communautés portent tout</h3>
+      <p class="body">Sur ses propres surfaces — profil Facebook, Instagram, LinkedIn — Julien obtient 10 réactions en moyenne. Dans les groupes et les clubs, 39 à 51. Le compte Instagram de 76 abonnés et le profil Strava de 8 abonnés ne produisent rien de comparable à un groupe où il est reconnu comme pratiquant.</p>
+      <p class="ev">Profil Facebook 9,9 · Instagram 9,5 · LinkedIn 11,0<br>Groupes Facebook 39,1 · Club Strava 51,3</p>
+    </div>
+
+    <div class="finding">
+      <span class="k">02</span>
+      <h3>Rien ne permet de choisir un groupe à l'avance</h3>
+      <p class="body">Ni la taille, ni le débit de publication, ni l'intitulé. Quatre prédictions ont été posées à l'aveugle avant relevé des chiffres ; les quatre ont échoué, la pire d'un facteur treize. La composition réelle d'un groupe ne se lit que dans ses commentaires — c'est-à-dire après avoir publié.</p>
+      <p class="ev">Trois groupes nommés « trail » : 81 · 5 · 3 sur un texte identique<br>Deux groupes de taille égale (12 100 / 12 600) : 27 · 1</p>
+    </div>
+
+    <div class="finding">
+      <span class="k">03</span>
+      <h3>C'est le diabète qui accroche, pas les kilomètres</h3>
+      <p class="body">Sur cinq plateformes différentes, la conversation se noue systématiquement sur une seule ligne du texte — le diagnostic — jamais sur les 250 km du Sahara. La version LinkedIn qui ouvre sur « ma lutte quotidienne contre la maladie » et ne mentionne la course qu'aux deux tiers réalise le meilleur score de la plateforme.</p>
+      <p class="ev">« moi aussi je suis diabétique, la course ça m'aide bien »<br>« j'ai eu les yeux humides en lisant votre parcours »<br>« Bienvenido al club, chico — visiblement tu n'as pas pris ta carte »</p>
+    </div>
+
+    <div class="finding">
+      <span class="k">04</span>
+      <h3>Les formats non narratifs sont faibles partout</h3>
+      <p class="body">C'est la seule régularité stable de tout le corpus. Les mémos de conseils et les annonces de série donnent le même résultat médiocre quel que soit le groupe, sa taille ou son audience — quand les récits, eux, oscillent de 0 à 725 selon l'endroit.</p>
+      <p class="ev">Sept publications non narratives : 11 · 11 · 10 · 7 · 7 · 4 · 4<br>Groupes de 1 900 à 187 000 membres</p>
+    </div>
+
+    <div class="finding">
+      <span class="k">05</span>
+      <h3>Sur LinkedIn, la place du lien gouverne la diffusion</h3>
+      <p class="body">Quatre posts, quatre traitements du lien, un classement parfaitement monotone. Un post sans lien touche seize fois plus de monde qu'un post portant un lien en clair, et sa diffusion hors réseau passe de 16 % à 78 %. Le mécanisme est connu : LinkedIn restreint ce qui fait sortir l'utilisateur.</p>
+      <p class="ev">Aucun lien &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2 286 impressions · 78 % hors réseau<br>Lien en commentaire&nbsp;&nbsp;&nbsp;721 · 348&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;· 61 % · 56 %<br>Lien dans le post &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;220 impressions · 16 % hors réseau</p>
+    </div>
+
+    <div class="finding">
+      <span class="k">06</span>
+      <h3>Les hashtags n'apportent rien</h3>
+      <p class="body">Le seul post Instagram dont la plateforme détaille la source des vues montre deux vues issues des hashtags, pour dix-neuf hashtags. Et le seul post publié sans aucun hashtag réalise le troisième meilleur score de vues du compte.</p>
+      <p class="ev">19 hashtags → 2 vues sur 109<br>0 hashtag → 143 vues</p>
+    </div>
+
+    <div class="finding">
+      <span class="k">07</span>
+      <h3>Une question ne marche que si tout le monde peut y répondre</h3>
+      <p class="body">« La sixième erreur, c'est laquelle selon vous ? » a produit 25 commentaires dans un groupe. « Et vous les Namibiens, vous êtes prêts ? » en a produit un, puis zéro. La différence n'est pas la présence d'une question, c'est le nombre de gens qu'elle concerne et ce qu'elle leur donne à raconter. Et aucune question ne sauve un texte qui annonce au lieu de raconter.</p>
+      <p class="ev">Sur onze publications portant la même question ouverte :<br>25 · 14 · 8 · 3 commentaires — et zéro dans les sept autres</p>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Ce qui ne l'est pas</p>
+    <h2>Le cimetière des explications</h2>
+    <p>Neuf lectures ont été proposées au fil du dépouillement, chacune plausible au moment où elle a été formulée. Chacune a été démentie par la donnée suivante. Elles sont listées dans l'ordre où elles sont tombées, pour qu'aucune ne soit ressuscitée par distraction.</p>
+  </div>
+
+  <div class="grave">
+    <div class="gitem"><span class="x">✕</span><span class="h">Le groupe multiplie le profil par cinq</span><span class="d">Deux couples donnaient × 5,1 et × 5,4. <b>Le troisième a donné × 0,6</b> — le groupe faisait moins bien que le profil.</span></div>
+    <div class="gitem"><span class="x">✕</span><span class="h">Les récits marchent, les conseils non</span><span class="d">Vrai sur quatre posts. <b>Le récap du 9 mai est un récit et fait 10 réactions</b> dans le groupe qui en avait produit 72.</span></div>
+    <div class="gitem"><span class="x">✕</span><span class="h">La portée s'érode à force de publier</span><span class="d">La courbe descendait joliment. <b>L'intervalle de silence le plus long avant une reprise avait produit la pire chute de la série.</b></span></div>
+    <div class="gitem"><span class="x">✕</span><span class="h">Le débit de publication du groupe décide</span><span class="d">Prédiction posée à l'avance : × 4 dans un groupe quatre fois plus calme, à taille et audience égales. <b>Résultat : 3 réactions contre 5.</b></span></div>
+    <div class="gitem"><span class="x">✕</span><span class="h">C'est l'absence de lien qui a fait les 725</span><span class="d">Séduisant, et conforté par LinkedIn. Mais <b>un second récit sans lien, avec photos, fait 15 réactions</b> — et le même texte avec lien en fait 29 ailleurs.</span></div>
+    <div class="gitem"><span class="x">✕</span><span class="h">L'adéquation entre le sujet et l'audience explique tout</span><span class="d">La lecture a tenu le plus longtemps. <b>Un groupe a inversé le rapport : 81 pour le contenu spécialisé, 10 pour le récit universel.</b></span></div>
+    <div class="gitem"><span class="x">✕</span><span class="h">Les groupes régionaux génèrent des partages</span><span class="d">Un post régional avait fait 2 partages pour 5 réactions — quarante fois le taux habituel. <b>Le second groupe régional en a fait zéro sur deux posts.</b></span></div>
+    <div class="gitem"><span class="x">✕</span><span class="h">Sur Instagram, le sujet photographié trie les résultats</span><span class="d">Les deux carrousels de désert dominaient. <b>Un carrousel urbain est venu se glisser entre eux et le reste.</b></span></div>
+    <div class="gitem"><span class="x">✕</span><span class="h">La part de non-abonnés décroît continûment</span><span class="d">Six points de suite, de 57 % à 13 %. <b>Le septième est remonté à 36 %.</b></span></div>
+  </div>
+
+  <div class="callout">
+    <p class="eyebrow">Ce qu'il faut en retenir</p>
+    <p>L'archive documente une <strong>dispersion</strong>, pas une règle. Elle dit précisément ce qui s'est passé où — donc où ne plus publier — mais elle ne permet pas de décider où publier la prochaine fois. Toute nouvelle lecture devra être posée <em>avant</em> les chiffres, sur un seul point, comme les quatre prédictions de ce dossier — dont aucune n'a été juste.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Correction — données du blog</p>
+    <h2>Les réactions ne prédisent pas le trafic</h2>
+    <p>Les compteurs des plateformes annonçaient 7 clics. L'analytics du blog, sur la même période, en compte <strong>1 145</strong>. Ce qui manquait n'était pas la mesure du volume — c'était de savoir <em>quel groupe</em> les envoyait.</p>
+  </div>
+
+  <div class="chart">
+    <div class="chart-title">
+      <h3>Deux articles, deux rendements — février → juin 2026</h3>
+      <span class="chart-note">réactions réseaux · visiteurs blog</span>
+    </div>
+    <svg viewBox="0 0 1000 172" role="img" aria-label="L'article 5 erreurs reçoit 239 réactions et 626 visiteurs ; l'article 105 kg reçoit 1185 réactions et 301 visiteurs.">
+      <text x="0" y="34" fill="var(--muted)" font-family="IBM Plex Mono" font-size="11">RÉACTIONS RÉSEAUX</text>
+      <text x="0" y="104" fill="var(--muted)" font-family="IBM Plex Mono" font-size="11">VISITEURS BLOG</text>
+      <rect x="230" y="20" width="118" height="22" fill="var(--ink-2)" opacity="0.35"/>
+      <text x="358" y="37" fill="var(--ink)" font-family="IBM Plex Mono" font-size="13" font-weight="600">239</text>
+      <text x="404" y="37" fill="var(--muted)" font-family="IBM Plex Sans" font-size="12.5">5 erreurs</text>
+      <rect x="230" y="50" width="586" height="22" fill="var(--ink-2)" opacity="0.35"/>
+      <text x="826" y="67" fill="var(--ink)" font-family="IBM Plex Mono" font-size="13" font-weight="600">1 185</text>
+      <text x="884" y="67" fill="var(--muted)" font-family="IBM Plex Sans" font-size="12.5">105 kg</text>
+      <rect x="230" y="90" width="310" height="22" fill="var(--accent)"/>
+      <text x="550" y="107" fill="var(--accent)" font-family="IBM Plex Mono" font-size="13" font-weight="600">626</text>
+      <text x="600" y="107" fill="var(--muted)" font-family="IBM Plex Sans" font-size="12.5">5 erreurs</text>
+      <rect x="230" y="120" width="149" height="22" fill="var(--accent)" opacity="0.5"/>
+      <text x="389" y="137" fill="var(--accent)" font-family="IBM Plex Mono" font-size="13" font-weight="600">301</text>
+      <text x="435" y="137" fill="var(--muted)" font-family="IBM Plex Sans" font-size="12.5">105 kg</text>
+      <text x="0" y="166" fill="var(--muted)" font-family="IBM Plex Sans" font-size="11.5">L'article cinq fois moins aimé a amené deux fois plus de lecteurs. Rendement : 2,6 visiteurs par réaction contre 0,25.</text>
+    </svg>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Plateforme</th><th>Traitement du lien</th><th class="num">Visiteurs envoyés</th><th>Ce que les plateformes en disaient</th></tr></thead>
+      <tbody>
+        <tr><td>Facebook <span class="dim mono">45 posts</span></td><td>lien en clair dans le texte</td><td class="num" style="color:var(--accent)">1 090</td><td class="dim">Rien — aucun compteur</td></tr>
+        <tr><td>Instagram <span class="dim mono">10 posts</span></td><td>lien en bio</td><td class="num" style="color:var(--accent)">37</td><td class="dim">6 clics déclarés</td></tr>
+        <tr><td>LinkedIn <span class="dim mono">4 posts</span></td><td>en commentaire, ou en clair</td><td class="num" style="color:var(--accent)">17</td><td class="dim">1 clic déclaré</td></tr>
+        <tr><td>Strava <span class="dim mono">3 posts</span></td><td><span style="color:var(--neg)">liens interdits par la plateforme</span></td><td class="num dim">0</td><td class="dim">Structurellement impossible</td></tr>
+        <tr class="total"><td colspan="2">Total, février → juin 2026</td><td class="num">1 145</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <p><strong>Facebook a produit environ 25 visiteurs par publication</strong>, sans jamais l'annoncer. Les plateformes mesurent ce qui les arrange ; le blog mesure ce qui arrive. Ce qu'aucune des deux ne dit encore, c'est <strong>quel groupe</strong> envoie ces visiteurs — seule l'attribution UTM le donnera.</p>
+    <p style="margin-top:16px">Le mécanisme de l'écart : « 105 kg » raconte l'histoire <strong>en entier</strong>, le lecteur n'a aucune raison de cliquer. « 5 erreurs » donne <strong>deux erreurs sur cinq et garde les trois autres</strong> — une promesse nommée, dénombrée, tenue seulement sur le blog. Un post à lien doit retenir quelque chose de compté : pas « la suite sur le blog », mais « les trois autres sont sur le blog ».</p>
+    <p style="margin-top:16px">Trois enseignements de plus : <strong>1,2 % du trafic vient de Google</strong> — la base de départ du positionnement, faible mais non nulle. <strong>La page « À propos » reçoit 6 % des visiteurs</strong>, des gens qui veulent savoir qui écrit. Et <strong>39 % arrivent dans le navigateur intégré de Facebook</strong>, le contexte le plus hostile à un formulaire d'inscription — à tester avant d'espérer le moindre abonné.</p>
+    <p style="margin-top:16px">Reste vrai, et douloureux : le canal WhatsApp, ouvert pour reprendre la main sur la diffusion, a recueilli <strong>sept contacts en cinq mois</strong>. Une audience ne se transfère pas sur simple appel.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Ce que j'en ferais</p>
+    <h2>Sept décisions</h2>
+    <p>Les trois premières ne demandent aucune hypothèse : elles découlent directement de ce qui est mesuré.</p>
+  </div>
+
+  <div class="acts">
+
+    <div class="act">
+      <span class="p now">acté</span>
+      <h3>Baliser tous les liens sortants</h3>
+      <p>Le blog utilise déjà des UTM pour k-lif et UltraPack. Rien n'en portait sur les 62 publications. Le volume, lui, était connu de l'analytics — 1 145 visiteurs. Ce qu'aucune donnée ne dit, c'est <strong>quel groupe</strong> les a envoyés, et c'est précisément ce qui permettrait d'arrêter les mauvais et de doubler les bons.</p>
+    </div>
+
+    <div class="act">
+      <span class="p now">acté</span>
+      <h3>Sortir Strava, LinkedIn et WhatsApp du dispositif</h3>
+      <p>Strava interdit les liens : sa meilleure-du-corpus moyenne de 51 kudos par post ne pourra jamais servir aucun des trois objectifs. LinkedIn touche large mais ne fidélise pas — 0 abonné en quatre posts, devant une audience de consultants franciliens. WhatsApp a plafonné à 7 contacts. Reste Facebook et Instagram.</p>
+    </div>
+
+    <div class="act">
+      <span class="p now">acté</span>
+      <h3>Fermer les canaux morts</h3>
+      <p>Le groupe <em>Course à pied</em> (17 300 membres) plafonne à 1-2 réactions par post, tous auteurs confondus. La Bretagne, la Réunion et <em>Bons plans</em> n'ont jamais rien produit. Neuf publications y ont été dépensées, dont les meilleurs récits du corpus.</p>
+    </div>
+
+    <div class="act">
+      <span class="p now">acté</span>
+      <h3>Retenir quelque chose de compté dans les posts à lien</h3>
+      <p>C'est le levier le mieux mesuré du dossier : « 5 erreurs » rapporte 2,6 visiteurs par réaction, « 105 kg » 0,25 — facteur 10. Le premier annonce qu'il garde <strong>trois erreurs sur cinq</strong> pour le blog ; le second raconte tout. Un post à lien ne dit pas « la suite sur le blog », il dit ce qu'il retient et combien.</p>
+    </div>
+
+    <div class="act">
+      <span class="p now">acté</span>
+      <h3>Inviter, à la fin des articles les plus lus</h3>
+      <p>Le formulaire d'inscription fonctionne, y compris dans le navigateur Facebook par lequel arrivent 39 % des visiteurs. Mais les quatre articles les plus consultés — <strong>1 173 visiteurs, 71 % du trafic</strong> — se terminent sans inviter à quoi que ce soit. Le taux de conversion n'est pas faible : il est structurellement nul. Commencer par 005 et 006, qui concentrent 927 visiteurs à eux seuls.</p>
+    </div>
+
+    <div class="act">
+      <span class="p next">à tester</span>
+      <h3>Le lien en commentaire, sur un récit fort</h3>
+      <p>C'est le seul arbitrage que l'archive ne tranche pas. Sur LinkedIn, le lien en clair divise la portée par seize ; le lien en commentaire la protège mais rend la conversion invisible. Un récit puissant, publié avec le lien en commentaire, réglerait la question en un post.</p>
+    </div>
+
+    <div class="act">
+      <span class="p next">à tester</span>
+      <h3>Relever le niveau de référence avant d'interpréter</h3>
+      <p>Un chiffre ne veut rien dire sans savoir à combien tournent les autres publications du groupe. Ce relevé, demandé trop tard, a réglé en une phrase un cas sur lequel deux hypothèses fausses avaient été construites.</p>
+    </div>
+
+    <div class="act">
+      <span class="p next">à écrire</span>
+      <h3>Assumer le diabète comme porte d'entrée</h3>
+      <p>Cinq plateformes, le même constat : c'est la ligne du diagnostic qui fait écrire les gens, jamais les kilomètres. Elle occupe une phrase dans la plupart des posts. La charte n'en fait pas un sujet — mais elle n'interdit pas d'ouvrir par là.</p>
+    </div>
+
+    <div class="act">
+      <span class="p next">à arrêter</span>
+      <h3>Les posts qui résument le blog</h3>
+      <p>« J'ai documenté l'aventure en 6 articles, voici ce qu'ils contiennent. » Sept publications de ce type, de 4 à 11 réactions, sur des groupes dont la taille varie d'un facteur cent. C'est le seul format dont l'échec soit prévisible.</p>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Honnêteté du dossier</p>
+    <h2>Ce que ces chiffres ne valent pas</h2>
+  </div>
+  <div class="prose">
+    <ul class="plain">
+      <li><strong>Les stats ne sont pas à J+7.</strong> Elles ont été relevées le 10 septembre 2026, soit jusqu'à six mois après publication. Ce sont des cumuls, donc majorés — et d'autant plus que le post est ancien. Ils se comparent entre eux, jamais avec un relevé propre fait ultérieurement.</li>
+      <li><strong>Quatre plateformes sur cinq n'exposent aucune portée.</strong> Facebook et Strava donnent des réactions sans dénominateur : on ne saura jamais si un zéro signifie « personne n'a aimé » ou « personne n'a vu ».</li>
+      <li><strong>Plusieurs dates sont approximatives.</strong> Les décomptes inscrits dans les textes (« dans 37 jours ») ont été recopiés d'une publication à l'autre sans mise à jour : ils datent la vague, pas le post. Les fichiers concernés le signalent.</li>
+      <li><strong>Un post Instagram manque</strong> au dossier, entre le 26 avril et le 11 mai.</li>
+      <li><strong>Le nombre de membres du club Strava n'a pas été relevé</strong>, ce qui laisse ses 89 kudos non pleinement interprétables.</li>
+      <li><strong>Le kudos n'est pas la réaction Facebook.</strong> Son coût social est plus faible et sa réciprocité entre membres d'un club plus forte. Les moyennes par surface ne se comparent qu'avec cette réserve.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <p>Établi à partir de <span class="mono">posts-reseaux-sociaux/</span> — 62 fichiers, un par publication, avec le texte intégral, les compteurs, les commentaires notables et les réserves de lecture. Chaque groupe porte un <span class="mono">README.md</span> documentant sa taille, son débit et son niveau d'engagement habituel.</p>
+</footer>
+
+</div>

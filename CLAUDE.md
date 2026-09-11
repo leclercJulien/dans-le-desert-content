@@ -38,6 +38,30 @@ The constraints most easily violated:
 - Sponsors (k-lif.com), UltraPack and affiliate links are allowed and must be **explicitly flagged** — never slipped into a race report. Only gear actually used on the ground gets mentioned, and criticism of a partner's product stays permitted.
 - Emojis are allowed as punctuation, rarely.
 
+## Réseaux sociaux
+
+`posts-reseaux-sociaux/` archives the social posts (one file per post), organised by platform then surface: `Facebook/profil/`, `Facebook/groupes/<nom-du-groupe>/`, and so on. It is **not** part of the blog corpus: the charte does not apply there, and it is never a voice sample. Read it when advising on distribution — what format, hook, platform or timing has actually worked — not when drafting an article.
+
+Conventions live in `posts-reseaux-sociaux/README.md`. Four that matter when reading the data:
+
+- An **empty** stat field means the platform gave no such metric; `0` means a measured zero. Never conflate them — a Facebook personal profile reports no view count at all.
+- `j7_complet: false` marks a post younger than 7 days whose figures are not yet comparable.
+- The September 2026 retroactive import carries figures read on 2026-09-10, not at J+7. They are inflated relative to a true J+7 reading, the more so the older the post; compare them with each other, not with later clean readings.
+- **No post has ever been boosted.** Every reach figure here is organic — do not ask.
+
+## Stratégie de diffusion
+
+`strategie/` is the operating system for publishing from September 2026 onward — objectives,
+counters, the monthly cycle, the UTM convention, the per-platform protocol, and an article
+pipeline seeded from real reader comments. **Read it before advising on what to write or where
+to post it.** It supersedes the ad-hoc approach of the first six months, whose outcome is
+recorded in `posts-reseaux-sociaux/post-mortem-diffusion.html`.
+
+Three rules from it that override intuition: objectives are conversions (newsletter,
+contributors, UltraPack), never volume; every outbound link is UTM-tagged; and most posts
+carry **no link at all** — the platforms tax outbound links heavily, and the best-performing
+post of the whole corpus had none.
+
 ## File naming
 
 `NNN-slug-in-kebab-case.md`, numbered in publication order. Gaps are intentional (`013` does not exist) and `manille-windhoek-20-heures-de-vol.md` is unnumbered — do not renumber to close either. A new article takes the next free number.

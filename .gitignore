@@ -30,3 +30,6 @@ Desktop.ini
 *.mp3
 *.mp4
 *.mov
+
+# Exports bruts des réseaux sociaux (volumineux, non versionnés — voir posts-reseaux-sociaux/README.md)
+posts-reseaux-sociaux/_import/
