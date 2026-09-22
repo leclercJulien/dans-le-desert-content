@@ -1,7 +1,7 @@
 ---
 title: "Cappadoce, Pérou ... ou l'Islande ?"
 date: 2026-09-08
-description: "C'est la rentrée, mon calendrier 2027 est parfaitement vide, et je passe mes soirées à chercher ma prochaine grande course. MDS Cappadoce, MDS Pérou, ou une infidélité ? Je n'ai rien tranché, et pour une fois j'aimerais bien votre avis."
+description: "Mon calendrier 2027 est vide et je passe mes soirées à chercher ma prochaine grande course : MDS Cappadoce, MDS Pérou, ou une infidélité au sable ? Je n'ai rien tranché, et pour une fois j'aimerais bien votre avis. Côté 2026, c'est réglé : l'EcoTrail de Paris le 17 octobre."
 category: 'Réflexion'
 ---
 C'est la rentrée. Pas de grand objectif de course devant moi, un calendrier 2027 parfaitement vide, et une question qui revient sans arrêt "c'est quoi ma prochaine 'grande' courses ?".
@@ -25,18 +25,20 @@ Là, ça se complique. C'est plus technique, plus loin de ce que je connais, et 
 
 **Fire and Ice, en Islande.** Format assez proche du Legendary : 250 km, en autonomie, bivouac, et un effectif minuscule (40 à 50 participants). Il fait relativement frais, ce qui après trois déserts ne me déplairait pas, encore faudra-t-il que je me renseigne sérieusement sur la façon dont le corps d'un diabétique réagit au froid, voire au froid intense, parce que ça, je ne sais pas encore le gérer. Et les conditions sont épiques : les quatre saisons dans la même journée.
 
-**Jungle Ultra, au Pérou.** Oui, encore le Pérou, mais celui-là n'attend l'autorisation de personne. 230 km sur cinq étapes en pleine jungle, et pour une fois un climat auquel Manille m'aura vraiment préparé : chaud, humide, poisseux. C'est ma porte de sortie possible si le MDS ne rouvre pas la destination. Ça a l'air suffisamment fada pour me plaire. Seul souci : il faudrait se décider vite, il ne reste que dix places. Par contre, le prix ... Aïe, Aïe, Aïe ...
+**Jungle Ultra, au Pérou.** Oui, encore le Pérou, mais celui-là n'attend l'autorisation de personne. 230 km sur cinq étapes en pleine jungle, et pour une fois un climat auquel Manille m'aura vraiment préparé : chaud, humide, poisseux. C'est ma porte de sortie possible si le MDS ne rouvre pas la destination. Ça a l'air suffisamment fada pour me plaire. Seul souci : il faudrait se décider vite, il ne reste que dix places. Par contre, le prix... Aïe, Aïe, Aïe...
 
 Je n'ai rien tranché. Vous choisiriez quoi, vous ?
 
-## Et l'EcoTrail, alors ?
-Juste avant que la question ne tombe en commentaire : non, je ne serai pas sur l'EcoTrail de Paris en octobre. [Je vous l'avais pourtant annoncé en juin](/journal/015-et-maintenant).
+## J'ai failli ne pas y aller
+L'EcoTrail de Paris, 50 km, le 17 octobre. [Je vous l'avais annoncé en juin](/journal/015-et-maintenant), et depuis un mois je tergiverse. J'y vais, j'y vais pas ... Incapable de prendre une décision et ce pour plusieurs raisons.
 
-Un conflit d'agenda, d'abord. Ensuite l'entraînement : la saison des pluies à Manille est encore plus généreuse que les années précédentes, et mes sorties se résument depuis des semaines à des créneaux volés entre deux orages. Et puis l'addition (l'avion, l'hôtel, les repas, une semaine minimum sur place) plus le temps que ça coûte, ce qui, quand on est freelance, se compte assez vite.
+L'entraînement, d'abord : la saison des pluies à Manille est encore plus généreuse que d'habitude, et mes sorties se résument depuis des semaines à des créneaux volés entre deux orages, quand j'ai de la chance. On a eu droit à deux semaines d'affilée de pluie, deux typhons, l'un après l'autre. Autant dire qu'on ne sort pas courir dans des conditions pareilles et que le moral en prend un coup. Le diabète ensuite, changement de traitement suite à de mauvais résultats. Depuis, je fais le yoyo entre hypo et hyper. Je vais finir par trouver le bon équilibre, mais ce n'est pas simple (si vous aussi, vous êtes diabétique, dites-moi comment vous gérez ce genre de choses quand ça vous arrive). Et l'agenda, enfin : un conflit qui rend ma venue en France compliquée.
 
-Mis bout à bout, ça fait non. Trois Marathon des Sables m'ont appris que les problèmes n'arrivent pas par hasard : ils s'installent pendant la préparation, et le jour J se contente de présenter la facture. Renoncer en septembre, c'est moins glorieux qu'abandonner en octobre. C'est aussi beaucoup moins cher.
+Au final, trois bonnes raisons de dire non. Du coup... j'ai tout réservé 😜
 
-Par contre, j'ai réussi à m'inscrire au semi-marathon de Manille fin novembre, histoire de compenser. J'avais déjà tenté l'an dernier : le système de paiement était aux fraises. Cette année la transaction est passée, donc c'est parti. En espérant ne pas avoir à annuler celle-là aussi.
+Je me vois déjà le 17 octobre regretter cette décision et pester contre moi-même... Je vais y aller tranquille, pas de classement, pas d'objectif, juste finir. Ce sera mon premier vrai trail et je compte bien en profiter.
+
+Autre course, fin novembre, je vais faire le semi-marathon de Manille. J'avais tenté de m'inscrire l'an dernier, mais le système de paiement était aux fraises. Cette année la transaction est passée. Là par contre, je vais me fixer un objectif : faire mieux que [la dernière fois](https://www.strava.com/activities/12584297668/overview).
 
 ## Pendant ce temps, ici
 Vous avez peut-être remarqué que le site a un peu changé. Je vous l'avais dit dans le dernier article : la première version avait été bricolée en vitesse pour que les récits de Namibie partent à temps, et elle a fini par montrer ses limites.

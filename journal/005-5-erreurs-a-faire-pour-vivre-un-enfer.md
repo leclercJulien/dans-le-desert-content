@@ -50,5 +50,13 @@ Il fait 47°C. Le sol est fuyant. Votre corps n'est pas habitué. L'orga nous di
 
 Vous découvrez un gel énergétique miracle ou une nouvelle paire de chaussettes trois jours avant le départ ? Laissez-les dans le tiroir. Le MDS est le pire endroit pour tester des trucs. Soyez conservateurs. Restez sur ce que vous avez validé à l'entraînement, même si c'est "ennuyeux". La nouveauté dans le désert, c'est souvent le début des problèmes gastriques ou des ampoules surprises.
 
-## Conclusion
-S’il n’y avait qu’une erreur à retenir, c’est le poids du sac. C’est un handicap que vous portez physiquement et mentalement chaque seconde. Soyez impitoyables avec vos grammes.
+## Il en manque au moins une
+S’il n’y en avait qu’une à retenir, c’est le poids du sac. C’est le seul handicap que vous portez à la fois sur les épaules et dans la tête, à chaque seconde. Soyez impitoyables avec vos grammes.
+
+Pour le reste, cette liste s’arrête à cinq parce que c’est un chiffre rond, pas parce que j’ai fait le tour. J’en referai d’autres, c’est à peu près la seule certitude que j’ai. Simplement pas les mêmes.
+
+**Alors la sixième erreur, c’est laquelle selon vous ?** Racontez-la en commentaire : celle que vous avez faite, celle que vous avez vu faire, ou celle que vous redoutez encore. C’est le genre de liste qui ne vaut que si elle se remplit à plusieurs.
+
+Et si cet article peut éviter une étape 2, comme la mienne, à quelqu’un que vous connaissez, partagez-le. Ça ne coûte rien et ça évite les problèmes.
+
+Enfin, si vous voulez la suite, il y a une newsletter. Pas de spam : j’écris quand il se passe quelque chose.
